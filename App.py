@@ -38,9 +38,30 @@ def insert_menu(menu_name, member_name, dt):
 
 st.title("순신점심기록장")
 
+
+df = pd.read_csv('note/menu.csv')
+
+start_idx = df.columns.get_loc('2025-01-07')
+melted_df = df.melt(id_vars=['ename'], value_vars=df.columns[start_idx:-2],
+                     var_name='dt', value_name='menu')
+
+not_na_df = melted_df[~melted_df['menu'].isin(['-','x','<결석>'])]
+
+#selected_df = pd.DataFrame([[1,2,3],[4,5,6]], columns=['a','b','c'])
+select_df = pd.DataFrame(not_na_df, columns=['menu','ename','dt'])
+
+#gdf = not_na_df.groupby('ename')['menu'].count().reset_index()
+gdf = select_df.groupby('ename')['menu'].count().reset_index()
+#gdf.plot(x="ename", y="menu", kind="bar")
+
+name_list = gdf['ename']
+
 st.subheader("입력")
 menu_name = st.text_input("메뉴 이름", placeholder="예: 김치찌개")
-member_name = st.text_input("먹은 사람", value="TOM")
+#member_name = st.text_input("먹은 사람", value="TOM")
+member_name = st.selectbox(
+        "먹은 사람", name_list)
+
 dt = st.date_input("얌얌 날짜")
 
 isPress = st.button("메뉴 저장")
@@ -71,21 +92,10 @@ rows = cursor.fetchall()
 cursor.close()
 
 #selected_df = pd.DataFrame([[1,2,3],[4,5,6]], columns=['a','b','c'])
-select_df = pd.DataFrame(rows, columns=['menu','ename','dt'])
+#select_df = pd.DataFrame(rows, columns=['menu','ename','dt'])
 select_df
 
 st.subheader("통계")
-df = pd.read_csv('note/menu.csv')
-
-start_idx = df.columns.get_loc('2025-01-07')
-melted_df = df.melt(id_vars=['ename'], value_vars=df.columns[start_idx:-2], 
-                     var_name='dt', value_name='menu')
-
-not_na_df = melted_df[~melted_df['menu'].isin(['-','x','<결석>'])]
-
-#gdf = not_na_df.groupby('ename')['menu'].count().reset_index()
-gdf = select_df.groupby('ename')['menu'].count().reset_index()
-#gdf.plot(x="ename", y="menu", kind="bar")
 
 gdf
 
