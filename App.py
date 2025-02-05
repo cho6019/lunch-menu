@@ -5,7 +5,7 @@ import psycopg
 
 DB_CONFIG = {
     "user": "sunsin",
-    "dbname": "sunsindb",
+    "dbname": "postgres",
     "password": "mysecretpassword",
     "host": "localhost",
     "port": "5432"
@@ -29,7 +29,7 @@ if isPress:
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-           "INSERT INTO lunch_menu (menu_name, member_name, dt) VALUES (%s, %s, %s);",
+           "INSERT INTO lunch_menu(menu_name, member_name, dt) VALUES (%s, %s, %s);",
             (menu_name, member_name, dt)
         )
         conn.commit()
@@ -83,4 +83,15 @@ st.pyplot(fig)
 # TODO
 # CSV 로드해서 한번에 다 디비에 INSERT 하는거
 st.subheader("벌크 인서트")
-st.button("한방에 인서트")
+importPress = st.button("한방에 인서트")
+
+if importPress:
+    conn = get_connection()
+    cursor = conn.cursor()
+    #cursor.execute("TRUNCATE TABLE lunch_menu;")
+    for i in range(not_na_df.shape[0]):
+        cursor.execute("INSERT INTO lunch_menu(menu_name, member_name, dt) VALUES (%s, %s, %s);",
+        (not_na_df.iloc[i, 2], not_na_df.iloc[i, 0], not_na_df.iloc[i, 1]))
+    conn.commit()
+    cursor.close()
+
