@@ -2,18 +2,33 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import psycopg
+import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
 DB_CONFIG = {
-    "user": "sunsin",
-    "dbname": "postgres",
-    "password": "mysecretpassword",
-    "host": "localhost",
-    "port": "5432"
+   "user": os.getenv("DB_USERNAME"),
+   "dbname": os.getenv("DB_NAME"),
+   "password": os.getenv("DB_PASSWORD"),
+   "host": os.getenv("DB_HOST"),
+   "port": os.getenv("DB_PORT")
 }
+#환경변수를 통한 설정(보안)
 
 def get_connection():
     return psycopg.connect(**DB_CONFIG)
 
+def insert_menu(menu_name, member_name, dt):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+           "INSERT INTO lunch_menu(menu_name, member_name, dt) VALUES (%s, %s, %s);",
+            (menu_name, member_name, dt)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
 
 st.title("순신점심기록장")
 
@@ -26,15 +41,7 @@ isPress = st.button("메뉴 저장")
 
 if isPress:
     if menu_name and member_name and dt:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-           "INSERT INTO lunch_menu(menu_name, member_name, dt) VALUES (%s, %s, %s);",
-            (menu_name, member_name, dt)
-        )
-        conn.commit()
-        cursor.close()
-
+        insert_menu(menu_name, member_name, dt)
         st.success(f"버튼{isPress}:{menu_name},{member_name},{dt}")
     else:
         st.warning(f"모든 값을 입력해주세요!")
@@ -85,6 +92,7 @@ st.pyplot(fig)
 st.subheader("벌크 인서트")
 importPress = st.button("한방에 인서트")
 
+
 if importPress:
     conn = get_connection()
     cursor = conn.cursor()
@@ -94,4 +102,19 @@ if importPress:
         (not_na_df.iloc[i, 2], not_na_df.iloc[i, 0], not_na_df.iloc[i, 1]))
     conn.commit()
     cursor.close()
+    conn.close()
+"""
 
+if importPress:
+    df = pd.read_csv('note/menu.csv')
+    start_idx = df.columns.get_loc('2025-01-07')
+    melted_df = df.melt(id_vars=['ename'], value_vars=df.columns[start_idx:-2],
+                        var_name='dt', value_name='menu')
+
+    not_na_df = melted_df[~melted_df['menu'].isin(['-', 'x', '<결석>'])]
+
+    for _, row in not_na_df.iterrows():
+        insert_menu(row['menu'], row['ename'], row['dt'])
+
+    st.success(f"벌크인서트 성공")
+"""

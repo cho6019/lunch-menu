@@ -32,3 +32,21 @@ $ sudo docker stop local-postgres
 # Into CONTAINER
 $ sudo docker exec -it local-postgres bash
 ```
+
+- RUN
+```bash
+# 디비 정보에 맞춰 수정
+$cp env.dummy .env
+
+# 서버 시작
+$ streamlit run App.py
+```
+
+
+
+
+
+
+
+
+
