@@ -83,9 +83,13 @@ gdf
 
 # 📊 Matplotlib로 바 차트 그리기
 # https://docs.streamlit.io/develop/api-reference/charts/st.pyplot
-fig, ax = plt.subplots()
-gdf.plot(x="ename", y="menu", kind="bar", ax=ax)
-st.pyplot(fig)
+try: fig, ax = plt.subplots()
+    gdf.plot(x="ename", y="menu", kind="bar", ax=ax)
+    st.pyplot(fig)
+except Exception as e:
+    st.waring("not enough data")
+    print(f"Exception{e}")
+
 
 # TODO
 # CSV 로드해서 한번에 다 디비에 INSERT 하는거
