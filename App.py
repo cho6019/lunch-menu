@@ -20,6 +20,7 @@ def get_connection():
     return psycopg.connect(**DB_CONFIG)
 
 def insert_menu(menu_name, member_name, dt):
+    try:
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
@@ -29,6 +30,11 @@ def insert_menu(menu_name, member_name, dt):
         conn.commit()
         cursor.close()
         conn.close()
+        return True
+    except Exception as e:
+        print(f"Exception{e}")
+        return False
+
 
 st.title("순신점심기록장")
 
@@ -41,8 +47,10 @@ isPress = st.button("메뉴 저장")
 
 if isPress:
     if menu_name and member_name and dt:
-        insert_menu(menu_name, member_name, dt)
-        st.success(f"버튼{isPress}:{menu_name},{member_name},{dt}")
+        if insert_menu(menu_name, member_name, dt):
+            st.success(f"버튼{isPress}:{menu_name},{member_name},{dt}")
+        else:
+            st.warning(f"금일 이미 입력")
     else:
         st.warning(f"모든 값을 입력해주세요!")
 
@@ -83,7 +91,8 @@ gdf
 
 # 📊 Matplotlib로 바 차트 그리기
 # https://docs.streamlit.io/develop/api-reference/charts/st.pyplot
-try: fig, ax = plt.subplots()
+try:
+    fig, ax = plt.subplots()
     gdf.plot(x="ename", y="menu", kind="bar", ax=ax)
     st.pyplot(fig)
 except Exception as e:
