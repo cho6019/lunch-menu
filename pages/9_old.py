@@ -2,13 +2,13 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
-from lunch_menu.db import get_connection
-from lunch_menu.db import insert_menu
-from lunch_menu.db import select_table
+from lunch_menu.db import get_connection, insert_menu, select_table
 from datetime import datetime
 
 # dotenv가 .env의 정보를 환경변수화
 load_dotenv()
+
+st.set_page_config(page_title="Old")
 
 # page title
 st.title("순신점심기록장")
@@ -22,6 +22,29 @@ not_na_df = melted_df[~melted_df['menu'].isin(['-','x','<결석>'])]
 select_df = pd.DataFrame(not_na_df, columns=['menu','ename','dt'])
 gdf = select_df.groupby('ename')['menu'].count().reset_index()
 name_list = gdf['ename']
+
+# 입력 정보 생성 코드
+st.subheader("입력")
+menu_name = st.text_input("메뉴 이름", placeholder="예: 김치찌개")
+member_name = st.selectbox(
+        "먹은 사람", name_list)
+
+dt = st.date_input("얌얌 날짜")
+
+# 멤버 인덱스 추출
+members = {"TOM": 1, "cho": 2, "hyun": 3, "JERRY": 4, "SEO": 5, "jiwon": 6, "jacob": 7, "heejin": 8, "lucas": 9, "nuni": 10}
+new_list = list(members.keys())
+
+# 정보 삽입 버튼
+isPress = st.button("메뉴 저장")
+if isPress:
+    if menu_name and member_name and dt:
+        if insert_menu(menu_name, (new_list.index(member_name)+1), dt):
+            st.success(f"버튼{isPress}:{menu_name},{member_name},{dt}")
+        else:
+            st.warning(f"금일 이미 입력")
+    else:
+        st.warning(f"모든 값을 입력해주세요!")
 
 # 안 쓴 사람 찾기
 notWrite = st.button("범인 색출")
