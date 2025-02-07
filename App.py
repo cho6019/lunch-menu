@@ -66,13 +66,13 @@ dt = st.date_input("얌얌 날짜")
 
 isPress = st.button("메뉴 저장")
 
-members = {"SEO": 5, "TOM": 1, "cho": 2, "hyun": 3, "nuni": 10, "JERRY": 4, "jacob": 7, "jiwon": 6, "lucas": 9, "heejin": 8}
+members = {"TOM": 1, "cho": 2, "hyun": 3, "JERRY": 4, "SEO": 5, "jiwon": 6, "jacob": 7, "heejin": 8, "lucas": 9, "nuni": 10}
 new_list = list(members.keys())
 
 
 if isPress:
     if menu_name and member_name and dt:
-        if insert_menu(menu_name, new_list.index(member_name), dt):
+        if insert_menu(menu_name, (new_list.index(member_name)+1), dt):
             st.success(f"버튼{isPress}:{menu_name},{member_name},{dt}")
         else:
             st.warning(f"금일 이미 입력")
@@ -128,7 +128,7 @@ if importPress:
     #cursor.execute("TRUNCATE TABLE lunch_menu;")
     for i in range(not_na_df.shape[0]):
         cursor.execute("INSERT INTO lunch_menu(menu_name, member_name, dt) VALUES (%s, %s, %s);",
-        (not_na_df.iloc[i, 2], new_list.index(not_na_df.iloc[i, 0]), not_na_df.iloc[i, 1]))
+        (not_na_df.iloc[i, 2], new_list.index(not_na_df.iloc[i, 0])+1, not_na_df.iloc[i, 1]))
     conn.commit()
     cursor.close()
     conn.close()
