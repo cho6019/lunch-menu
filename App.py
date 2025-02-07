@@ -1,14 +1,14 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from lunch_menu.db import get_connection
 from lunch_menu.db import insert_menu
 from lunch_menu.db import select_table
 from datetime import datetime
 
 # dotenv가 .env의 정보를 환경변수화
-load_dotenv()
+#load_dotenv()
 
 # page title
 st.title("순신점심기록장")
