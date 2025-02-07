@@ -66,9 +66,13 @@ dt = st.date_input("얌얌 날짜")
 
 isPress = st.button("메뉴 저장")
 
+members = {"SEO": 5, "TOM": 1, "cho": 2, "hyun": 3, "nuni": 10, "JERRY": 4, "jacob": 7, "jiwon": 6, "lucas": 9, "heejin": 8}
+new_list = list(members.keys())
+
+
 if isPress:
     if menu_name and member_name and dt:
-        if insert_menu(menu_name, member_name, dt):
+        if insert_menu(menu_name, new_list.index(member_name), dt):
             st.success(f"버튼{isPress}:{menu_name},{member_name},{dt}")
         else:
             st.warning(f"금일 이미 입력")
@@ -79,9 +83,9 @@ if isPress:
 st.subheader("확인")
 query = """SELECT 
 menu_name AS menu, 
-member_name AS ename, 
+name AS ename, 
 dt 
-FROM lunch_menu 
+FROM lunch_menu as l left join member as m on l.member_name = m.id
 ORDER BY dt DESC"""
 
 conn = get_connection()
@@ -90,13 +94,15 @@ cursor.execute(query)
 rows = cursor.fetchall()
 #conn.commit()
 cursor.close()
+conn.close()
 
 #selected_df = pd.DataFrame([[1,2,3],[4,5,6]], columns=['a','b','c'])
-#select_df = pd.DataFrame(rows, columns=['menu','ename','dt'])
+select_df = pd.DataFrame(rows, columns=['menu','ename','dt'])
 select_df
 
 st.subheader("통계")
 
+gdf = select_df.groupby('ename')['menu'].count().reset_index()
 gdf
 
 # 📊 Matplotlib로 바 차트 그리기
@@ -106,7 +112,7 @@ try:
     gdf.plot(x="ename", y="menu", kind="bar", ax=ax)
     st.pyplot(fig)
 except Exception as e:
-    st.waring("not enough data")
+    st.write("not enough data")
     print(f"Exception{e}")
 
 
@@ -122,7 +128,7 @@ if importPress:
     #cursor.execute("TRUNCATE TABLE lunch_menu;")
     for i in range(not_na_df.shape[0]):
         cursor.execute("INSERT INTO lunch_menu(menu_name, member_name, dt) VALUES (%s, %s, %s);",
-        (not_na_df.iloc[i, 2], not_na_df.iloc[i, 0], not_na_df.iloc[i, 1]))
+        (not_na_df.iloc[i, 2], new_list.index(not_na_df.iloc[i, 0]), not_na_df.iloc[i, 1]))
     conn.commit()
     cursor.close()
     conn.close()
