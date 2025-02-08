@@ -2,11 +2,11 @@ import streamlit as st
 from lunch_menu.db import get_connection
 from lunch_menu.db import insert_menu
 from lunch_menu.db import select_table
-from datetime import datetime
+from lunch_menu.keyword import normalize_menu
 
 st.set_page_config(page_title='INPUT')
 
-st.markdown("# Demo")
+st.markdown("# 신규 정보입력")
 st.sidebar.header("Plotting Demo")
 
 # 멤버 인덱스 추출
@@ -15,19 +15,19 @@ new_list = list(members.keys())
 
 
 # 입력 정보 생성 코드
-st.subheader("입력")
 menu_name = st.text_input("메뉴 이름", placeholder="예: 김치찌개")
 member_name = st.selectbox(
         "먹은 사람", new_list)
 
-dt = st.date_input("얌얌 날짜")
+dt = st.date_input("먹은 날짜")
 
 # 정보 삽입 버튼
 isPress = st.button("메뉴 저장")
 if isPress:
     if menu_name and member_name and dt:
+        menu_name = normalize_menu(menu_name)
         if insert_menu(menu_name, (new_list.index(member_name)+1), dt):
-            st.success(f"버튼{isPress}:{menu_name},{member_name},{dt}")
+            st.success(f"{menu_name},{member_name},{dt}가 입력되었습니다")
         else:
             st.warning(f"금일 이미 입력")
     else:
@@ -35,19 +35,3 @@ if isPress:
 
 
 
-notWrite = st.button("범인 색출")
-if notWrite:
-    today = datetime.today().strftime('%Y-%m-%d')
-    query = """
-    SELECT name FROM member left join (SELECT * FROM lunch_menu where dt=(SELECT CURRENT_DATE))
-    as lunch on member.id = lunch.member_name
-    WHERE lunch.menu_name is null;
-    """
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(query)
-    results = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    for result in results:
-        st.write(result)
