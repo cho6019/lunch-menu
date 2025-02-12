@@ -53,3 +53,19 @@ def select_table():
         rows = cur.fetchall()
     select_df = pd.DataFrame(rows, columns=['menu','ename','dt'])
     return select_df
+
+# for sync
+def select_table_sync():
+    query = """SELECT
+    menu_name,
+    name,
+    dt
+    FROM lunch_menu as l left join member as m on l.member_name = m.id
+    ORDER BY dt DESC"""
+    
+    conn = get_connection()
+    with conn.cursor() as cur:
+        cur.execute(query)
+        rows = cur.fetchall()
+    select_df = pd.DataFrame(rows, columns=['menu_name','name','dt'])
+    return select_df
