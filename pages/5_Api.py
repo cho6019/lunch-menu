@@ -23,5 +23,3 @@ if st.button("나이계산"):
         st.success(f'나이계산{dt}')
     else:
         st.write(f'what?{response.status_code}')
-    
-    
